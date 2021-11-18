@@ -1,112 +1,98 @@
 package kg.bakai.nsd
 
-import android.annotation.SuppressLint
+import android.content.Context
+import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
-import android.os.Message
 import android.util.Log
-import kg.bakai.nsd.connection.ChatConnection
+import android.widget.Toast
 import kg.bakai.nsd.databinding.ActivityMainBinding
+import java.io.DataInputStream
+import java.io.DataOutputStream
+import java.io.IOException
+import java.net.ServerSocket
+import java.net.Socket
 
 class MainActivity : AppCompatActivity() {
 
-    private val TAG = "LOG"
+    private val TAG = "SERVER"
     private lateinit var binding: ActivityMainBinding
 
-    private lateinit var nsdHelper: NsdHelper
-    private lateinit var mConnection: ChatConnection
-
-    private var mUpdateHandler: Handler? = null
-
-    @SuppressLint("HandlerLeak")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        mUpdateHandler = object : Handler() {
-            override fun handleMessage(msg: Message) {
-                val chatline = msg.data.getString("msg")
-                addChatline(chatline)
-            }
-        }
+        val thread = Thread(MyServer(this))
+        thread.start()
 
         bindView()
     }
 
-    private fun clickAdvertise() {
-        if (mConnection.getLocalPort() > -1) {
-            nsdHelper.registerService(mConnection.getLocalPort())
-        } else {
-            Log.d(TAG, "ServerSocket isn't bound.")
-        }
-    }
-
-    private fun clickDiscover() {
-        nsdHelper.discoverServices()
-    }
-
-    private fun clickConnect() {
-        val service = nsdHelper.getChosenInfo()
-        Log.d(TAG, "$service")
-        if (service != null) {
-            mConnection.connectToServer(service.host, service.port)
-        } else {
-            Log.d(TAG, "No service to connect to!")
-        }
-    }
-
-    private fun clickSend() {
-        val messageString = binding.editText.text.toString()
-        if (messageString.isNotEmpty()) {
-            mConnection.sendMessage(messageString)
-        }
-        binding.editText.setText("")
-    }
-
-    fun addChatline(line: String?) {
-        binding.textView.append("\n" + line)
-    }
 
     private fun bindView() {
         binding.apply {
-            register.setOnClickListener {
-                clickAdvertise()
-            }
-            discover.setOnClickListener {
-                clickDiscover()
-            }
-            resolve.setOnClickListener {
-                clickConnect()
-            }
             btnSend.setOnClickListener {
-                clickSend()
+                val b = BackgroundTask()
+                b.execute(etIp.text.toString(), etMessage.text.toString())
             }
         }
     }
+}
 
-    override fun onStart() {
-        mConnection = ChatConnection(mUpdateHandler!!)
-        nsdHelper = NsdHelper(this)
-        nsdHelper.initializeNsd()
-        super.onStart()
+class MyServer(private val context: Context): Runnable {
+    private val TAG = "SERVER"
+    var ss: ServerSocket? = null
+    var client: Socket? = null
+    var dis: DataInputStream? = null
+    var message = ""
+    private val handler = Handler()
+
+    override fun run() {
+        try {
+            ss = ServerSocket(8080)
+            if (ss != null) {
+                handler.post { Toast.makeText(context, "Waiting for client", Toast.LENGTH_SHORT).show() }
+                Log.i(TAG, ss?.localSocketAddress.toString())
+                while (true) {
+                    client = ss?.accept()
+                    Log.i(TAG, "New client: ${client?.inetAddress} ${client?.localPort}")
+                    dis = DataInputStream(client?.getInputStream())
+                    message = dis?.readUTF()!!
+                    handler.post { Toast.makeText(context, "Message received: $message", Toast.LENGTH_SHORT).show() }
+                }
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
     }
+}
 
-    override fun onPause() {
-        super.onPause()
-        nsdHelper.stopDiscovery()
+
+class BackgroundTask: AsyncTask<String, Unit, String>() {
+    private val TAG = "LOG"
+
+    private var s: Socket? = null
+    private var dos: DataOutputStream? = null
+    private var message = ""
+    private var ip = ""
+
+    override fun doInBackground(vararg params: String?): String {
+        ip = params[0].toString()
+        message = params[1].toString()
+
+        try {
+            s = Socket("192.168.31.$ip", 8080)
+            dos = DataOutputStream(s?.getOutputStream())
+            dos?.writeUTF(message)
+
+            dos?.close()
+
+            s?.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        return ""
     }
-
-    override fun onResume() {
-        super.onResume()
-        nsdHelper.discoverServices()
-    }
-
-    override fun onStop() {
-        nsdHelper.tearDown()
-        mConnection.teardown()
-        super.onStop()
-    }
-
 }

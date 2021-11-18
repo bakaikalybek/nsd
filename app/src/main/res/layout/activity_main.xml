@@ -7,51 +7,82 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity"
     android:orientation="vertical"
+    android:gravity="center"
     android:padding="16dp">
 
-    <Button
-        android:id="@+id/register"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Register"/>
 
-    <Button
-        android:id="@+id/discover"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Discover"/>
+<!--    <androidx.constraintlayout.widget.ConstraintLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content">-->
+<!--        <TextView-->
+<!--            android:id="@+id/tv_broadcast"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Broadcast"-->
+<!--            app:layout_constraintTop_toTopOf="parent"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"/>-->
 
-    <Button
-        android:id="@+id/resolve"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Connect"/>
+<!--        <Button-->
+<!--            android:id="@+id/btn_start"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginEnd="8dp"-->
+<!--            android:text="Start"-->
+<!--            app:layout_constraintTop_toBottomOf="@id/tv_broadcast"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintEnd_toStartOf="@id/btn_stop"/>-->
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+<!--        <Button-->
+<!--            android:id="@+id/btn_stop"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginStart="8dp"-->
+<!--            android:text="Stop"-->
+<!--            app:layout_constraintTop_toBottomOf="@id/tv_broadcast"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintStart_toEndOf="@id/btn_start"/>-->
+<!--    </androidx.constraintlayout.widget.ConstraintLayout>-->
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textFieldIp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <EditText
-            android:id="@+id/edit_text"
-            android:layout_width="0dp"
+        android:layout_marginTop="16dp"
+        android:hint="192.168.31.*">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_Ip"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btn_send"/>
-        <Button
-            android:id="@+id/btn_send"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="SEND"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            />
 
-
+    </com.google.android.material.textfield.TextInputLayout>
     <TextView
-        android:id="@+id/text_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:text="Huawei: 118, Pixel: 56"/>
 
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textFieldMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Message">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <Button
+        android:id="@+id/btn_send"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="16dp"
+        android:text="Send"/>
 
 </LinearLayout>
