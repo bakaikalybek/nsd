@@ -44,6 +44,21 @@
 <!--            app:layout_constraintStart_toEndOf="@id/btn_start"/>-->
 <!--    </androidx.constraintlayout.widget.ConstraintLayout>-->
 
+    <Button
+        android:id="@+id/btn_start_sender"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="16dp"
+        android:text="Start Sender"/>
+
+    <Button
+        android:id="@+id/btn_start_receiver"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="16dp"
+        android:text="Start Receiver"/>
+
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textFieldIp"
         android:layout_width="match_parent"
@@ -54,8 +69,7 @@
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_Ip"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            />
+            android:layout_height="wrap_content" />
 
     </com.google.android.material.textfield.TextInputLayout>
     <TextView
@@ -84,5 +98,12 @@
         android:layout_height="60dp"
         android:layout_marginTop="16dp"
         android:text="Send"/>
+
+    <Button
+        android:id="@+id/btn_discover"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="16dp"
+        android:text="Discover devices"/>
 
 </LinearLayout>
