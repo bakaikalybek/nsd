@@ -9,19 +9,21 @@ import java.io.IOException
 import java.net.Socket
 
 class SocketClient: AsyncTask<String, Unit, String>() {
-    private val TAG = "Activity"
+    private val TAG = "SOCKET"
 
     private var s: Socket? = null
     private var dos: DataOutputStream? = null
     private var message = ""
     private var ip = ""
+    private var port = 0
 
     override fun doInBackground(vararg params: String?): String {
         ip = params[0].toString()
-        message = params[1].toString()
+        port = params[1]?.toInt()!!
+        message = params[2].toString()
 
         try {
-            s = Socket("192.168.31.$ip", 8080)
+            s = Socket(ip, port)
             dos = DataOutputStream(s?.getOutputStream())
             dos?.writeUTF(message)
 

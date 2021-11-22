@@ -5,28 +5,32 @@ import android.os.Handler
 import android.util.Log
 import android.widget.Toast
 import java.io.DataInputStream
+import java.io.DataOutputStream
 import java.io.IOException
 import java.net.ServerSocket
 import java.net.Socket
 
 class SocketServer(private val context: Context): Runnable {
-    private val TAG = "SERVER"
+    private val TAG = "SOCKET"
     var ss: ServerSocket? = null
     var client: Socket? = null
     var dis: DataInputStream? = null
+    var dos: DataOutputStream? = null
     var message = ""
     private val handler = Handler()
 
     override fun run() {
         try {
-            ss = ServerSocket(8080)
+            ss = ServerSocket(64666)
             if (ss != null) {
                 handler.post { Toast.makeText(context, "Waiting for client", Toast.LENGTH_SHORT).show() }
-                Log.i(TAG, ss?.localSocketAddress.toString())
+                Log.i(TAG, "$ss")
                 while (true) {
                     client = ss?.accept()
                     Log.i(TAG, "New client: ${client?.inetAddress} ${client?.localPort}")
                     dis = DataInputStream(client?.getInputStream())
+                    dos = DataOutputStream(client?.getOutputStream())
+                    dos?.writeUTF("Delivery: succeed")
                     message = dis?.readUTF()!!
                     handler.post { Toast.makeText(context, "Message received: $message", Toast.LENGTH_SHORT).show() }
                 }
