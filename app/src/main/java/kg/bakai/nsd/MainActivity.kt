@@ -47,12 +47,16 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             btnSend.setOnClickListener(this@MainActivity)
             btnDiscover.setOnClickListener(this@MainActivity)
             viewModel.loading.observe(this@MainActivity) { loading ->
+                tvServer.text = "Loading ..."
                 progressBar.isVisible = loading
                 btnSend.isEnabled = !loading
                 btnDiscover.isEnabled = !loading
             }
             viewModel.message.observe(this@MainActivity) {
                 Toast.makeText(this@MainActivity, it, Toast.LENGTH_SHORT).show()
+            }
+            viewModel.server.observe(this@MainActivity) {
+                tvServer.text = "Connected to: ${it.hostAddress}"
             }
         }
     }

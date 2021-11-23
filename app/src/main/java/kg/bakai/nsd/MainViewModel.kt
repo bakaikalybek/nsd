@@ -1,7 +1,6 @@
 package kg.bakai.nsd
 
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import kg.bakai.nsd.repository.MainRepository
@@ -9,29 +8,29 @@ import kotlinx.coroutines.*
 import java.io.*
 import java.net.InetAddress
 import java.net.Socket
-import kotlin.concurrent.thread
 
 class MainViewModel(private val repository: MainRepository): ViewModel() {
     private val TAG = "SOCKET"
 
     val loading = MutableLiveData(false)
     val message = MutableLiveData<String>()
-    val devices = MutableLiveData<MutableList<InetAddress>>()
+    val server = MutableLiveData<InetAddress>()
 
     private fun connectToServer(ip: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val s = Socket(ip, 64666)
-                val dos = DataOutputStream(s?.getOutputStream())
-                val dis = DataInputStream(s?.getInputStream())
-                dos.writeUTF("Connect")
+                if (s.isConnected) {
+                    server.postValue(InetAddress.getByName(ip))
+                    val dos = DataOutputStream(s?.getOutputStream())
+                    dos.writeUTF("Connect")
+                    message.postValue(DataInputStream(s?.getInputStream()).readUTF())
 
-                Log.i(TAG, "Connected to: $ip")
-                message.postValue(dis.readUTF())
+                    Log.i(TAG, "Connected to: $ip")
 
-                dos.close()
-
-                s.close()
+                    dos.close()
+                    s.close()
+                }
             } catch (e: IOException) {
                 Log.i(TAG, "Couldn't connect to server: $ip ${e.localizedMessage}")
             }
@@ -41,20 +40,18 @@ class MainViewModel(private val repository: MainRepository): ViewModel() {
     fun sendMessage(input: String) {
         Log.i(TAG, "sendMessage from vm")
         CoroutineScope(Dispatchers.IO).launch {
-            devices.value?.forEach {
-                try {
-                    val s = Socket(it.hostAddress, 64666)
-                    val dos = DataOutputStream(s.getOutputStream())
-                    dos.writeUTF(input)
-                    Log.i(TAG, "Connected to: ${it.hostAddress}")
-                    val dis = DataInputStream(s.getInputStream())
-                    message.postValue(dis.readUTF())
-                    dos.close()
+            try {
+                val s = Socket(server.value?.hostAddress, 64666)
+                val dos = DataOutputStream(s.getOutputStream())
+                dos.writeUTF(input)
+                Log.i(TAG, "Message sent to: ${server.value?.hostAddress}")
+                val dis = DataInputStream(s.getInputStream())
+                message.postValue(dis.readUTF())
+                dos.close()
 
-                    s.close()
-                } catch (e: IOException) {
-                    Log.i(TAG, "Couldn't connect to Server: ${e.localizedMessage}")
-                }
+                s.close()
+            } catch (e: IOException) {
+                Log.i(TAG, "Couldn't connect to Server: ${e.localizedMessage}")
             }
         }
     }
@@ -66,7 +63,8 @@ class MainViewModel(private val repository: MainRepository): ViewModel() {
             val prefix = localInetAddress.hostAddress!!.substring(0, localInetAddress.hostAddress!!.lastIndexOf(".") + 1)
 
             val devicesLocal = mutableListOf<InetAddress>()
-            val findDevices = launch {
+            Log.i(TAG, "searching devices ...")
+            launch {
                 for (num in 0..254) {
                     launch {
                         val testIp = prefix + num
@@ -81,16 +79,17 @@ class MainViewModel(private val repository: MainRepository): ViewModel() {
                         }
                     }
                 }
-            }
-            Log.i(TAG, "searching devices ...")
-            findDevices.join()
-            devicesLocal.forEach {
-                Log.i(TAG, "Connecting to: ${it.hostAddress}")
-                connectToServer(it.hostAddress!!)
-
-            }
-            devices.postValue(devicesLocal)
+            }.join()
+            launch {
+                for (device in devicesLocal) {
+                    launch {
+                        Log.i(TAG, "Connecting to: ${device.hostAddress}")
+                        connectToServer(device.hostAddress!!)
+                    }
+                }
+            }.join()
             loading.postValue(false)
         }
     }
+
 }

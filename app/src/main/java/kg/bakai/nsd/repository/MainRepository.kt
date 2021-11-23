@@ -3,6 +3,10 @@ package kg.bakai.nsd.repository
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
+import android.util.Log
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.net.InetAddress
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
