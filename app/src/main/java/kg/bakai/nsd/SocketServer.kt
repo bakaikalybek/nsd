@@ -4,9 +4,11 @@ import android.content.Context
 import android.os.Handler
 import android.util.Log
 import android.widget.Toast
+import kg.bakai.nsd.data.model.Test
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
+import java.io.ObjectInputStream
 import java.net.ServerSocket
 import java.net.Socket
 
@@ -16,6 +18,7 @@ class SocketServer(private val context: Context): Runnable {
     var client: Socket? = null
     var dis: DataInputStream? = null
     var dos: DataOutputStream? = null
+    var ois: ObjectInputStream? = null
     var message = ""
     private val handler = Handler()
 
@@ -28,10 +31,10 @@ class SocketServer(private val context: Context): Runnable {
                 while (true) {
                     client = ss?.accept()
                     Log.i(TAG, "New client: ${client?.inetAddress} ${client?.localPort}")
-                    dis = DataInputStream(client?.getInputStream())
+//                    dis = DataInputStream(client?.getInputStream())
                     dos = DataOutputStream(client?.getOutputStream())
+                    ois = ObjectInputStream(client?.getInputStream())
                     dos?.writeUTF("Delivery: succeed")
-                    message = dis?.readUTF()!!
                     handler.post { Toast.makeText(context, "Message received: $message", Toast.LENGTH_SHORT).show() }
                 }
             }

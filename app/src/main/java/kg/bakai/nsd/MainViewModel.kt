@@ -1,8 +1,11 @@
 package kg.bakai.nsd
 
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import kg.bakai.nsd.data.model.OrderProductModel
+import kg.bakai.nsd.data.model.Test
 import kg.bakai.nsd.repository.MainRepository
 import kotlinx.coroutines.*
 import java.io.*
@@ -12,84 +15,20 @@ import java.net.Socket
 class MainViewModel(private val repository: MainRepository): ViewModel() {
     private val TAG = "SOCKET"
 
-    val loading = MutableLiveData(false)
-    val message = MutableLiveData<String>()
-    val server = MutableLiveData<InetAddress>()
+    val loading = repository.isLoading()
+    val message = repository.receivedMessage()
+    val server = repository.connectedServer()
 
-    private fun connectToServer(ip: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val s = Socket(ip, 64666)
-                if (s.isConnected) {
-                    server.postValue(InetAddress.getByName(ip))
-                    val dos = DataOutputStream(s?.getOutputStream())
-                    dos.writeUTF("Connect")
-                    message.postValue(DataInputStream(s?.getInputStream()).readUTF())
-
-                    Log.i(TAG, "Connected to: $ip")
-
-                    dos.close()
-                    s.close()
-                }
-            } catch (e: IOException) {
-                Log.i(TAG, "Couldn't connect to server: $ip ${e.localizedMessage}")
-            }
-        }
+    fun findDevices() {
+        repository.findDevices()
     }
 
     fun sendMessage(input: String) {
-        Log.i(TAG, "sendMessage from vm")
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val s = Socket(server.value?.hostAddress, 64666)
-                val dos = DataOutputStream(s.getOutputStream())
-                dos.writeUTF(input)
-                Log.i(TAG, "Message sent to: ${server.value?.hostAddress}")
-                val dis = DataInputStream(s.getInputStream())
-                message.postValue(dis.readUTF())
-                dos.close()
-
-                s.close()
-            } catch (e: IOException) {
-                Log.i(TAG, "Couldn't connect to Server: ${e.localizedMessage}")
-            }
-        }
+        repository.sendMessage(input)
     }
 
-    fun findDevices() {
-        loading.postValue(true)
-        CoroutineScope(Dispatchers.IO).launch {
-            val localInetAddress = repository.getInetAddress()
-            val prefix = localInetAddress.hostAddress!!.substring(0, localInetAddress.hostAddress!!.lastIndexOf(".") + 1)
-
-            val devicesLocal = mutableListOf<InetAddress>()
-            Log.i(TAG, "searching devices ...")
-            launch {
-                for (num in 0..254) {
-                    launch {
-                        val testIp = prefix + num
-                        val address = InetAddress.getByName(testIp)
-                        val reachable = address.isReachable(1000)
-                        if (reachable) {
-                            if (localInetAddress != address) {
-                                devicesLocal.add(address)
-                            } else {
-                                Log.i(TAG, "$address is same machine")
-                            }
-                        }
-                    }
-                }
-            }.join()
-            launch {
-                for (device in devicesLocal) {
-                    launch {
-                        Log.i(TAG, "Connecting to: ${device.hostAddress}")
-                        connectToServer(device.hostAddress!!)
-                    }
-                }
-            }.join()
-            loading.postValue(false)
-        }
+    fun removeOne() {
+        repository.removeOne()
     }
 
 }

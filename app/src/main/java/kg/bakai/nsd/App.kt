@@ -1,6 +1,7 @@
 package kg.bakai.nsd
 
 import android.app.Application
+import kg.bakai.nsd.di.appModule
 import kg.bakai.nsd.di.repoModule
 import kg.bakai.nsd.di.vmModule
 import org.koin.android.ext.koin.androidContext
@@ -11,7 +12,7 @@ class App: Application() {
         super.onCreate()
         startKoin {
             androidContext(this@App)
-            modules(vmModule, repoModule)
+            modules(vmModule, repoModule, appModule)
         }
     }
 }

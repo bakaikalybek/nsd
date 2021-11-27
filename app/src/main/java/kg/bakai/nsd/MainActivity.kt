@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import kg.bakai.nsd.databinding.ActivityMainBinding
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -39,6 +40,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             binding.btnDiscover -> {
                 viewModel.findDevices()
             }
+            binding.btnRemove -> {
+                viewModel.removeOne()
+            }
         }
     }
 
@@ -46,6 +50,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         binding.apply {
             btnSend.setOnClickListener(this@MainActivity)
             btnDiscover.setOnClickListener(this@MainActivity)
+            btnRemove.setOnClickListener(this@MainActivity)
             viewModel.loading.observe(this@MainActivity) { loading ->
                 tvServer.text = "Loading ..."
                 progressBar.isVisible = loading
