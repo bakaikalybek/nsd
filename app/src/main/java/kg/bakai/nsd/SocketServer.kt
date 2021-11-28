@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Handler
 import android.util.Log
 import android.widget.Toast
-import kg.bakai.nsd.data.model.Test
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException

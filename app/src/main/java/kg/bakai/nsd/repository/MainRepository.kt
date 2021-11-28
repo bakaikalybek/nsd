@@ -7,7 +7,8 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import kg.bakai.nsd.Converter
-import kg.bakai.nsd.data.model.OrderProductModel
+import kg.bakai.nsd.data.model.Addon
+import kg.bakai.nsd.data.model.Product
 import kotlinx.coroutines.*
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -24,9 +25,19 @@ class MainRepository(private val context: Context) {
     private val server = MutableLiveData<InetAddress>()
     private val message = MutableLiveData<String>()
 
-    private val products = mutableListOf<OrderProductModel>(
-        OrderProductModel(productName = "Latte", price = "5.5"),
-        OrderProductModel(productName = "Raf", price = "6.5")
+    private val products = mutableListOf<Product>(
+        Product(
+            name = "Latte",
+            count = 1,
+            price = 5.4,
+            addons = listOf(
+                Addon(
+                    name = "Caramel",
+                    count = 1,
+                    price = 2.3
+                )
+            )
+        )
     )
 
     fun findDevices() {
@@ -66,7 +77,19 @@ class MainRepository(private val context: Context) {
     }
 
     fun sendMessage(input: String) {
-        products.add(OrderProductModel(input, "1.2"))
+        products.add(Product(
+            name = input,
+            count = 2,
+            price = 5.4,
+            addons = listOf(
+                Addon(
+                    name = "Caramel",
+                    count = 1,
+                    price = 2.3
+                )
+            )
+        )
+        )
         Log.i(TAG, "sendMessage from vm")
 
         CoroutineScope(Dispatchers.IO).launch {

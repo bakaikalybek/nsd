@@ -4,8 +4,6 @@ import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import kg.bakai.nsd.data.model.OrderProductModel
-import kg.bakai.nsd.data.model.Test
 import kg.bakai.nsd.repository.MainRepository
 import kotlinx.coroutines.*
 import java.io.*
